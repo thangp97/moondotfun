@@ -24,11 +24,11 @@ const TokenDetail = () => {
     const [sellAmount, setSellAmount] = useState('');
 
     //Check list Uniswap
-    const UNISWAP_FACTORY = '0xF62c03E08ada871A0bEb309762E260a7a6a880E6'; // bạn cần đúng địa chỉ cho testnet
-    const UNISWAP_FACTORY_ABI = [ // Chỉ cần hàm getPair
+    const UNISWAP_FACTORY = '0xF62c03E08ada871A0bEb309762E260a7a6a880E6'; 
+    const UNISWAP_FACTORY_ABI = [ 
     "function getPair(address tokenA, address tokenB) external view returns (address pair)"
     ];
-    const WETH_ADDRESS = '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14'; // Thường Uniswap pair là token/WETH
+    const WETH_ADDRESS = '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14'; 
     const [pairAddress, setPairAddress] = useState(null);
 
 
