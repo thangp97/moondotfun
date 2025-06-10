@@ -23,7 +23,13 @@ const TokenDetail = () => {
     const navigate = useNavigate(); 
     const [sellAmount, setSellAmount] = useState('');
 
-
+    //Check list Uniswap
+    const UNISWAP_FACTORY = '0xF62c03E08ada871A0bEb309762E260a7a6a880E6'; // bạn cần đúng địa chỉ cho testnet
+    const UNISWAP_FACTORY_ABI = [ // Chỉ cần hàm getPair
+    "function getPair(address tokenA, address tokenB) external view returns (address pair)"
+    ];
+    const WETH_ADDRESS = '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14'; // Thường Uniswap pair là token/WETH
+    const [pairAddress, setPairAddress] = useState(null);
 
 
     const tokenDetails = card || {
@@ -40,6 +46,27 @@ const TokenDetail = () => {
     // Constants
     const fundingGoal = 24;
     const maxSupply = parseInt(800000);
+
+
+    useEffect(() => {
+        const checkUniswapListing = async () => {
+            try {
+            const provider = new ethers.JsonRpcProvider(process.env.REACT_APP_RPC_URL);
+            const factory = new ethers.Contract(UNISWAP_FACTORY, UNISWAP_FACTORY_ABI, provider);
+            const pair = await factory.getPair(tokenAddress, WETH_ADDRESS);
+            
+            if (pair !== ethers.ZeroAddress) {
+                setPairAddress(pair);
+            }
+            } catch (error) {
+            console.error('Error checking Uniswap pair:', error);
+            }
+        };
+
+        if (fundingRaised >= 24) {
+            checkUniswapListing();
+        }
+    }, [tokenAddress, fundingRaised]);
 
     useEffect(() => {
         const fetchData = async() => {
@@ -173,27 +200,44 @@ const TokenDetail = () => {
                         </div>
                     </div>
 
-                    <div className='buy-tokens'>
-                        <h3>Buy Tokens</h3>
-                        <input type="number"
-                            placeholder='Enter amount of tokens to buy'
-                            value={purchaseAmount}
-                            onChange={(e) => setPurchaseAmount(e.target.value)}
-                            className='buy-input' 
-                        />
-                        <button onClick={getCost} className='buy-button'>Purchase</button>
-                    </div>
+                    {pairAddress ? (
+                        <div style={{ marginTop: '20px' }} className='buy-tokens'>
+                            <h3>This token is listed on Uniswap!</h3>
+                            <p>Pair Address: <a href={`https://sepolia.etherscan.io/address/${pairAddress}`} target="_blank" rel="noopener noreferrer" className='link-ether'>{pairAddress}</a></p>
+                            <a
+                            href={`https://app.uniswap.org/#/swap?outputCurrency=${tokenAddress}&chain=sepolia`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="buy-button"
+                            >
+                            Trade on Uniswap
+                            </a>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className='buy-tokens'>
+                                <h3>Buy Tokens</h3>
+                                <input type="number"
+                                    placeholder='Enter amount of tokens to buy'
+                                    value={purchaseAmount}
+                                    onChange={(e) => setPurchaseAmount(e.target.value)}
+                                    className='buy-input' 
+                                />
+                                <button onClick={getCost} className='buy-button'>Purchase</button>
+                            </div>
 
-                    <div className='buy-tokens' style={{ marginTop: '20px' }}>
-                        <h3>Sell Tokens</h3>
-                        <input type="number"
-                            placeholder='Enter amount of tokens to sell'
-                            value={sellAmount}
-                            onChange={(e) => setSellAmount(e.target.value)}
-                            className='buy-input' 
-                        />
-                        <button onClick={handleSell} className='buy-button'>Sell Tokens</button>
-                    </div>
+                            <div className='buy-tokens' style={{ marginTop: '20px' }}>
+                                <h3>Sell Tokens</h3>
+                                <input type="number"
+                                    placeholder='Enter amount of tokens to sell'
+                                    value={sellAmount}
+                                    onChange={(e) => setSellAmount(e.target.value)}
+                                    className='buy-input' 
+                                />
+                                <button onClick={handleSell} className='buy-button'>Sell Tokens</button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             
