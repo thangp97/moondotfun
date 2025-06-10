@@ -15,6 +15,11 @@ export const tokenAbi = [
           "internalType": "uint256",
           "name": "initiaMintValue",
           "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_factoryAddress",
+          "type": "address"
         }
       ],
       "stateMutability": "nonpayable",
@@ -224,6 +229,24 @@ export const tokenAbi = [
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "decimals",
       "outputs": [
@@ -231,6 +254,19 @@ export const tokenAbi = [
           "internalType": "uint8",
           "name": "",
           "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "factoryAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",

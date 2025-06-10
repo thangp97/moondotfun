@@ -12,10 +12,10 @@ const TokenCreate = () => {
     const [imageUrl, setImageUrl] = useState('');
 
     const handleCreate = async () => {
-        // if (!name || !ticker || !description || !imageUrl) {
-        //     alert("Please fill in all fields.");
-        //     return;
-        // }
+        if (!name || !ticker || !imageUrl) {
+            alert("Please fill in all fields.");
+            return;
+        }
 
         // Tạo provider và signer
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -37,10 +37,6 @@ const TokenCreate = () => {
 
     return (
         <div className="app">
-            <nav className="navbar">
-                <a href="/" className="nav-link">[home]</a>
-                <button className="nav-button">[connect wallet]</button>
-            </nav>
             <div className="token-create-container">
                 <h3 className="start-new-coin" onClick={() => navigate('/')}>[go back]</h3>
                 <p className='info-text'>MemeCoin creation fee: 0.0001 ETH</p>

@@ -42,7 +42,7 @@ contract TokenFactory {
     string memory imageUrl) public payable returns(address) {
 
         require(msg.value >= MEMETOKEN_CREATION_FEE, "Invalid token creation fee");
-        Token memeTokenCt = new Token(name,symbol,INIT_SUPPPLY);
+        Token memeTokenCt = new Token(name,symbol,INIT_SUPPPLY, address(this));
         address memeTokenAddress = address(memeTokenCt);
         memeToken memory newlyCreatedToken = memeToken(name,symbol,description,imageUrl,0,memeTokenAddress,msg.sender);
         memeTokenAddresses.push(memeTokenAddress);
@@ -170,4 +170,46 @@ contract TokenFactory {
         console.log("LP Tokens burnt ", liquidity);
         return 1;
     }
+
+    function sellMemeToken(address memeTokenAddress, uint amountToSell) public returns (uint refundAmount) {
+        // Kiểm tra token có tồn tại không
+        require(addressToMemeTokenMapping[memeTokenAddress].tokenAddress != address(0), "Token does not exist");
+
+        Token tokenCt = Token(memeTokenAddress);
+        memeToken storage listedToken = addressToMemeTokenMapping[memeTokenAddress];
+
+        // Chuyển đổi về đơn vị bình thường (vì eth lấy tận 18 đơn vị thập phân)
+        uint amountToSellScaled = amountToSell * DECIMALS;
+
+        // Kiểm tra user có đủ balance
+        require(tokenCt.balanceOf(msg.sender) >= amountToSellScaled, "Not enough token balance");
+
+        // Tính toán supply hiện tại
+        uint currentSupply = tokenCt.totalSupply();
+        uint currentSupplyScaled = (currentSupply - INIT_SUPPPLY) / DECIMALS;
+
+        // Tính số tiền sẽ refund từ bonding curve
+        uint refund = calculateRefund(currentSupplyScaled, amountToSell);
+
+        // Burn token của user
+        tokenCt.burn(msg.sender, amountToSellScaled);
+
+        // Chuyển ETH cho user
+        require(address(this).balance >= refund, "Not enough ETH in contract");
+        payable(msg.sender).transfer(refund);
+
+        return refund;
+    }
+
+    function calculateRefund(uint256 currentSupply, uint256 tokensToSell) public pure returns (uint256) {
+        uint256 exponent1 = (K * currentSupply) / 10**18;
+        uint256 exponent2 = (K * (currentSupply - tokensToSell)) / 10**18;
+
+        uint256 exp1 = exp(exponent1);
+        uint256 exp2 = exp(exponent2);
+
+        uint256 refund = (INITIAL_PRICE * 10**18 * (exp1 - exp2)) / K;
+        return refund;
+    }
+
 }

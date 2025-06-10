@@ -5,6 +5,7 @@ import '../App.css';
 import { abi } from './abi';
 import { tokenAbi } from './tokenAbi';
 
+
 const TokenDetail = () => {
     const { tokenAddress } = useParams();
     const location = useLocation();
@@ -20,6 +21,10 @@ const TokenDetail = () => {
     const [cost, setCost] = useState('0');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate(); 
+    const [sellAmount, setSellAmount] = useState('');
+
+
+
 
     const tokenDetails = card || {
         name: 'Unknown',
@@ -118,12 +123,26 @@ const TokenDetail = () => {
         }
     };
 
+    const handleSell = async () => {
+        try {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const contract = new ethers.Contract(process.env.REACT_APP_CONTRACT_ADDRESS, abi, signer);
+
+            // Gọi hàm sell token trên smart contract
+            const tx = await contract.sellMemeToken(tokenAddress, sellAmount);
+            const receipt = await tx.wait();
+
+            alert(`Sell transaction successful! Hash: ${receipt.transactionHash}`);
+            setSellAmount(''); // reset input sau khi bán xong
+        } catch(error) {
+            console.error('Error during selling:', error);
+            alert('Error when selling tokens. See console for details.');
+        }
+    };
+
     return (
         <div className='token-detail-container'>
-            <nav className="navbar">
-                <a href="/" className="nav-link">[home]</a>
-                <button className="nav-button">[connect wallet]</button>
-            </nav>
             <h3 className='start-new-coin' onClick={() => navigate('/')}>[go back]</h3>
             <div className='token-details-section'>
                 <div className='token-details'>
@@ -164,6 +183,17 @@ const TokenDetail = () => {
                         />
                         <button onClick={getCost} className='buy-button'>Purchase</button>
                     </div>
+
+                    <div className='buy-tokens' style={{ marginTop: '20px' }}>
+                        <h3>Sell Tokens</h3>
+                        <input type="number"
+                            placeholder='Enter amount of tokens to sell'
+                            value={sellAmount}
+                            onChange={(e) => setSellAmount(e.target.value)}
+                            className='buy-input' 
+                        />
+                        <button onClick={handleSell} className='buy-button'>Sell Tokens</button>
+                    </div>
                 </div>
             </div>
             
@@ -199,6 +229,7 @@ const TokenDetail = () => {
                     </tbody>
                 </table>
             )}
+
 
             <h3>Transfers</h3>
             {loading ? (

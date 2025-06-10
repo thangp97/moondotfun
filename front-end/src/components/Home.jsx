@@ -71,10 +71,6 @@ const Home = () => {
 
     return (
         <div className="app">
-            <nav className="navbar">
-                <a href="/" className="nav-link">[home]</a>
-                <button className="nav-button">[connect wallet]</button>
-            </nav>
 
             <div className="card-container">
                 {/* Button tạo Token mới */}
